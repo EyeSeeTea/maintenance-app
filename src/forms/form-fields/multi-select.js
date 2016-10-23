@@ -9,6 +9,7 @@ import TextField from 'material-ui/TextField/TextField';
 import log from 'loglevel';
 import QuickAddLink from './helpers/QuickAddLink.component';
 import RefreshMask from './helpers/RefreshMask.component';
+import { isEqual } from 'lodash/fp';
 
 export const multiSelectActions = Action.createActionsFromNames([
     'addItemsToModelCollection',
@@ -101,6 +102,14 @@ export default React.createClass({
             .then(this.loadAvailableItems)
             .then(this.populateItemStore)
             .then(this.populateAssignedStore);
+    },
+
+    componentWillReceiveProps(newProps) {
+        // When the query filter changes we'll reload the items
+        if (isEqual(newProps.queryParamFilter, this.props.queryParamFilter) === false) {
+            this.reloadAvailableItems();
+            this.populateAssignedStore();
+        }
     },
 
     renderGroupEditor() {
@@ -311,24 +320,28 @@ export default React.createClass({
                 .concat(this.props.queryParamFilter)
                 .filter(f => f);
 
+            // TODO(mark): This is a rework of a previous hack because aggregationLevels are not proper identifiable objects
+            if (this.props.referenceProperty === 'aggregationLevels') {
+                return multiSelectSourceModelDefinition
+                    .list({ paging: false, fields: 'displayName,id,level', filter: filters })
+                    .then(modelCollection => modelCollection.toArray())
+                    .then(models => models.map(({ displayName, level }) => ({ displayName, id: level })));
+            }
+
             return multiSelectSourceModelDefinition
-                .list({ paging: false, fields: 'displayName|rename(name),id,level', filter: filters });
+                .list({ paging: false, fields: 'displayName,id', filter: filters });
         }
+
         return Promise.reject(`${this.props.referenceType} is not a model on d2.models`);
     },
 
     populateItemStore(availableItems) {
-        if (this.props.referenceProperty === 'aggregationLevels') {
-            this.state.itemStore.setState(Array.from(availableItems.values()).map((model) => {
-                return {
-                    value: model.level,
-                    text: model.displayName || model.name,
-                };
-            }));
-            return;
-        }
-
-        this.state.itemStore.setState(availableItems);
+        this.state.itemStore.setState(Array.from(availableItems.values()).map((model) => {
+            return {
+                value: model.id,
+                text: model.displayName,
+            };
+        }));
     },
 
     populateAssignedStore() {

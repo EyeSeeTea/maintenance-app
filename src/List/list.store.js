@@ -3,7 +3,28 @@ import { Subject, Observable } from 'rx';
 import Store from 'd2-ui/lib/store/Store';
 import appState from '../App/appStateStore';
 
-export const fieldFilteringForQuery = 'displayName|rename(name),shortName,id,lastUpdated,created,displayDescription,code,publicAccess,access,href,level';
+export const defaultFieldFilteringForQuery = 'displayName|rename(name),shortName,id,lastUpdated,created,displayDescription,code,publicAccess,access,href';
+const fieldFilteringForQueryPerSchemaName = new Map([
+    ['categoryCombo', 'displayName|rename(name),id,lastUpdated,created,code,publicAccess,access,href'],
+    ['indicatorType', 'displayName|rename(name),id,lastUpdated,created,code,publicAccess,access,href'],
+    ['indicatorGroup', 'displayName|rename(name),id,lastUpdated,created,code,publicAccess,access,href'],
+    ['indicatorGroupSet', 'displayName|rename(name),id,lastUpdated,created,code,publicAccess,access,href'],
+    ['trackedEntityAttributeGroup', 'displayName|rename(name),id,lastUpdated,created,code,publicAccess,access,href'],
+    ['relationshipType', 'displayName|rename(name),id,lastUpdated,created,code,publicAccess,access,href'],
+    ['constant', 'displayName|rename(name),id,lastUpdated,created,code,publicAccess,access,href'],
+    ['legendSet', 'displayName|rename(name),id,lastUpdated,created,code,publicAccess,access,href'],
+    ['optionSet', 'displayName|rename(name),id,lastUpdated,created,code,publicAccess,access,href'],
+    ['attribute', 'displayName|rename(name),id,lastUpdated,created,code,publicAccess,access,href'],
+    ['pushAnalysis', 'displayName|rename(name),id,lastUpdated,created,code,publicAccess,access,href'],
+]);
+
+export function getFieldFilteringForQuery(schemaName) {
+    if (fieldFilteringForQueryPerSchemaName.has(schemaName)) {
+        return fieldFilteringForQueryPerSchemaName.get(schemaName);
+    }
+
+    return defaultFieldFilteringForQuery;
+}
 
 const columnObservable = appState
     .filter(appState => appState.sideBar && appState.sideBar.currentSubSection)
@@ -40,7 +61,7 @@ export default Store.create({
                 const listPromise = d2.models[modelName]
                     .filter().on('name').notEqual('default')
                     .list({
-                        fields: fieldFilteringForQuery,
+                        fields: getFieldFilteringForQuery(modelName),
                         order: (modelName === 'organisationUnitLevel') ? 'level:ASC' : 'displayName:ASC'
                     });
 
@@ -75,7 +96,7 @@ export default Store.create({
             }
             const organisationUnitsThatMatchQuery = await organisationUnitModelDefinition
                 .list({
-                    fields: fieldFilteringForQuery,
+                    fields: getFieldFilteringForQuery(modelType),
                     query: searchString,
                     withinUserHierarchy: true,
                 });
@@ -96,7 +117,7 @@ export default Store.create({
 
                 const listSearchPromise = modelDefinition
                     .filter().on('name').notEqual('default')
-                    .list({ fields: fieldFilteringForQuery });
+                    .list({ fields: getFieldFilteringForQuery(modelType) });
 
                 this.listSourceSubject.onNext(Observable.fromPromise(listSearchPromise));
 

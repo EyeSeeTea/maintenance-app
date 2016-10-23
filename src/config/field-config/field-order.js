@@ -56,8 +56,8 @@ const fieldOrderByName = new Map([
         'name',
         'shortName',
         'code',
-        'dataDimensionType',
         'skipTotal',
+        'dataDimensionType',
         'categories',
     ]],
     ['categoryOptionGroup', [

@@ -2,7 +2,7 @@ import React from 'react';
 import List from '../List.component';
 import appState from '../../App/appStateStore';
 import { getInstance } from 'd2/lib/d2';
-import { fieldFilteringForQuery } from '../list.store';
+import { getFieldFilteringForQuery } from '../list.store';
 import listActions from '../list.actions';
 import log from 'loglevel';
 import ModelCollection from 'd2/lib/model/ModelCollection';
@@ -32,7 +32,7 @@ export default class OrganisationUnitList extends React.Component {
                     organisationUnitList = await organisationUnitList
                         .filter().on('name').notEqual('default')
                         .filter().on('parent.id').equals(selectedOrganisationUnit.id)
-                        .list({ fields: fieldFilteringForQuery });
+                        .list({ fields: getFieldFilteringForQuery('organisationUnit') });
 
                     // When a root organisation unit is selected we also add the root organisation unit to the list
                     // of available organisation units to pick from
