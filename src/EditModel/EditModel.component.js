@@ -17,7 +17,7 @@ import SharingNotification from './SharingNotification.component';
 import FormButtons from './FormButtons.component';
 import log from 'loglevel';
 import FormHeading from './FormHeading';
-import extraFields from './extraFields';
+import extraFields from './ExtraFields';
 import CircularProgress from 'material-ui/lib/circular-progress';
 import FontIcon from 'material-ui/lib/font-icon';
 import BackButton from './BackButton.component';
