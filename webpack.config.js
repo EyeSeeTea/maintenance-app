@@ -1,3 +1,5 @@
+"use strict";
+
 var webpack = require('webpack');
 var webpackBaseConfig = require('./webpack-base-config');
 
